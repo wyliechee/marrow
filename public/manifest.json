@@ -1,0 +1,10 @@
+{
+  "name": "Marrow",
+  "short_name": "Marrow",
+  "description": "A reading companion for active recall and spaced repetition",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#5160C8",
+  "icons": []
+}

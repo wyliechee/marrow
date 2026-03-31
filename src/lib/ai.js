@@ -55,7 +55,7 @@ Generate 3 questions that test recall of the key ideas from this reading session
 }
 
 export async function scoreAnswer(question, answer, bookTitle, chapterTitle, notes) {
-  const system = `You are a reading comprehension grader. Score the answer from 0.0 to 1.0 based on how well it demonstrates recall of the material. Return valid JSON only: {"score": <number>, "feedback": "<brief feedback>"}`;
+  const system = `You are a thoughtful reading companion. Evaluate the answer and provide a calm gap analysis. Score from 0.0 to 1.0. In "covered" list what the reader got right. In "gaps" list what they might revisit (or empty if nothing). Keep each item to one short sentence. Return valid JSON only: {"score": <number>, "covered": ["..."], "gaps": ["..."]}`;
 
   const user = `Book: "${bookTitle}"
 Chapter: "${chapterTitle}"
@@ -63,7 +63,7 @@ Context from reader's notes: "${notes}"
 Question: "${question}"
 Answer: "${answer}"
 
-Score this answer.`;
+Evaluate this answer.`;
 
   const raw = await callClaude(system, user);
   return JSON.parse(raw);

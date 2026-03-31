@@ -10,7 +10,7 @@ export default function RecallQuiz({ bookId, chapterId, sessions, onComplete }) 
   const [answers, setAnswers] = useState([]);
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [scores, setScores] = useState([]);
-  const [feedbacks, setFeedbacks] = useState([]);
+  const [results, setResults] = useState([]); // {covered, gaps} per question
   const [error, setError] = useState(null);
 
   if (!hasApiKey()) {
@@ -30,7 +30,7 @@ export default function RecallQuiz({ bookId, chapterId, sessions, onComplete }) 
       setCurrentQ(0);
       setAnswers([]);
       setScores([]);
-      setFeedbacks([]);
+      setResults([]);
       setStage('quiz');
     } catch (err) {
       setError(err.message);
@@ -51,9 +51,9 @@ export default function RecallQuiz({ bookId, chapterId, sessions, onComplete }) 
         book.title, chapter.title, allNotes,
       );
       const newScores = [...scores, result.score];
-      const newFeedbacks = [...feedbacks, result.feedback];
+      const newResults = [...results, { covered: result.covered || [], gaps: result.gaps || [] }];
       setScores(newScores);
-      setFeedbacks(newFeedbacks);
+      setResults(newResults);
 
       if (currentQ < questions.length - 1) {
         setCurrentQ(currentQ + 1);
@@ -87,13 +87,13 @@ export default function RecallQuiz({ bookId, chapterId, sessions, onComplete }) 
 
   if (stage === 'start') {
     return (
-      <div className="mt-4 bg-white rounded-xl border border-gray-100 p-6 text-center">
+      <div className="mt-4 bg-white rounded-2xl border border-gray-100 p-6 text-center">
         <p className="text-sm text-gray-600 mb-4">
           Test your recall of this chapter with 3 AI-generated questions.
         </p>
         {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
-        <button onClick={startQuiz} className="px-6 py-2.5 bg-accent text-white text-sm font-medium rounded-lg">
-          Start Quiz
+        <button onClick={startQuiz} className="px-6 py-2.5 bg-accent text-white text-sm font-medium rounded-xl">
+          Start recall
         </button>
       </div>
     );
@@ -101,10 +101,10 @@ export default function RecallQuiz({ bookId, chapterId, sessions, onComplete }) 
 
   if (stage === 'loading' || stage === 'scoring') {
     return (
-      <div className="mt-4 bg-white rounded-xl border border-gray-100 p-8 text-center">
+      <div className="mt-4 bg-white rounded-2xl border border-gray-100 p-8 text-center">
         <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto" />
         <p className="text-sm text-gray-500 mt-3">
-          {stage === 'loading' ? 'Generating questions...' : 'Evaluating answer...'}
+          {stage === 'loading' ? 'Generating questions...' : 'Reviewing your answer...'}
         </p>
       </div>
     );
@@ -112,7 +112,7 @@ export default function RecallQuiz({ bookId, chapterId, sessions, onComplete }) 
 
   if (stage === 'quiz') {
     return (
-      <div className="mt-4 bg-white rounded-xl border border-gray-100 p-5">
+      <div className="mt-4 bg-white rounded-2xl border border-gray-100 p-5">
         <div className="flex items-center justify-between mb-4">
           <span className="text-xs text-gray-400">Question {currentQ + 1} of {questions.length}</span>
           <div className="flex gap-1">
@@ -139,43 +139,64 @@ export default function RecallQuiz({ bookId, chapterId, sessions, onComplete }) 
         <button
           onClick={submitAnswer}
           disabled={!currentAnswer.trim()}
-          className="w-full mt-3 py-2 bg-accent text-white text-sm font-medium rounded-lg disabled:opacity-40"
+          className="w-full mt-3 py-2.5 bg-accent text-white text-sm font-medium rounded-xl disabled:opacity-40"
         >
-          Submit Answer
+          Submit
         </button>
       </div>
     );
   }
 
   if (stage === 'results') {
-    const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
     return (
-      <div className="mt-4 bg-white rounded-xl border border-gray-100 p-5">
-        <div className="text-center mb-5">
-          <p className="text-3xl font-semibold text-accent">{Math.round(avgScore * 100)}%</p>
-          <p className="text-sm text-gray-500 mt-1">Recall Score</p>
-        </div>
-        <div className="space-y-4">
+      <div className="mt-4 bg-white rounded-2xl border border-gray-100 p-5">
+        <p className="text-sm font-medium text-gray-900 mb-1">Recall complete</p>
+        <p className="text-xs text-gray-500 mb-5">
+          Here's what you remembered and what's worth revisiting.
+        </p>
+
+        <div className="space-y-5">
           {questions.map((q, i) => (
-            <div key={i} className="border-t border-gray-100 pt-3">
+            <div key={i} className="border-t border-gray-100 pt-4">
               <p className="text-sm font-medium text-gray-900">{q}</p>
-              <p className="text-sm text-gray-600 mt-1">{answers[i]}</p>
-              <div className="flex items-center gap-2 mt-2">
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                  scores[i] >= 0.7 ? 'bg-green-50 text-green-600' :
-                  scores[i] >= 0.4 ? 'bg-amber-50 text-amber-600' :
-                  'bg-red-50 text-red-500'
-                }`}>
-                  {Math.round(scores[i] * 100)}%
-                </span>
-                <span className="text-xs text-gray-400">{feedbacks[i]}</span>
-              </div>
+              <p className="text-sm text-gray-500 mt-1 italic">{answers[i]}</p>
+
+              {/* What you covered */}
+              {results[i]?.covered?.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs font-medium text-green-700 mb-1">What you covered</p>
+                  <ul className="space-y-0.5">
+                    {results[i].covered.map((item, j) => (
+                      <li key={j} className="text-xs text-gray-600 flex items-start gap-1.5">
+                        <span className="text-green-500 mt-0.5">+</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Gaps to revisit */}
+              {results[i]?.gaps?.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-xs font-medium text-amber-700 mb-1">Worth revisiting</p>
+                  <ul className="space-y-0.5">
+                    {results[i].gaps.map((item, j) => (
+                      <li key={j} className="text-xs text-gray-600 flex items-start gap-1.5">
+                        <span className="text-amber-500 mt-0.5">~</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           ))}
         </div>
+
         <button
           onClick={onComplete}
-          className="w-full mt-5 py-2 bg-accent text-white text-sm font-medium rounded-lg"
+          className="w-full mt-5 py-2.5 bg-accent text-white text-sm font-medium rounded-xl"
         >
           Done
         </button>

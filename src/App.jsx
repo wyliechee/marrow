@@ -5,6 +5,7 @@ import Library from './pages/Library';
 import BookDetail from './pages/BookDetail';
 import ChapterDetail from './pages/ChapterDetail';
 import Review from './pages/Review';
+import Settings from './pages/Settings';
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/library/:bookId" element={<BookDetail />} />
           <Route path="/library/:bookId/chapter/:chapterId" element={<ChapterDetail />} />
           <Route path="/review" element={<Review />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </div>
       <BottomNav />

@@ -115,26 +115,20 @@ export default function Review() {
         )}
       </div>
 
-      {/* Rating buttons */}
+      {/* Rating buttons — encouraging language per design */}
       {flipped && (
-        <div className="grid grid-cols-3 gap-2 mt-4">
+        <div className="grid grid-cols-2 gap-3 mt-4">
           <button
             onClick={() => handleRate(1)}
-            className="py-3 rounded-xl bg-red-50 text-red-600 text-sm font-medium"
+            className="py-3.5 rounded-xl bg-amber-50 text-amber-700 text-sm font-medium"
           >
-            Forgot
-          </button>
-          <button
-            onClick={() => handleRate(3)}
-            className="py-3 rounded-xl bg-amber-50 text-amber-600 text-sm font-medium"
-          >
-            Hard
+            Still learning
           </button>
           <button
             onClick={() => handleRate(5)}
-            className="py-3 rounded-xl bg-green-50 text-green-600 text-sm font-medium"
+            className="py-3.5 rounded-xl bg-green-50 text-green-700 text-sm font-medium"
           >
-            Easy
+            Knew it
           </button>
         </div>
       )}

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { getBooks, createBook } from '../lib/db';
+import { getBooks, createBook, createChapter } from '../lib/db';
 import { getBookScore } from '../lib/scoring';
+import { detectChapters, hasApiKey } from '../lib/ai';
 import { useState } from 'react';
 
 const FILTERS = [
@@ -17,16 +18,35 @@ export default function Library() {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [description, setDescription] = useState('');
+  const [adding, setAdding] = useState(false);
 
-  function handleAdd(e) {
+  async function handleAdd(e) {
     e.preventDefault();
-    if (!title.trim()) return;
-    createBook({ title: title.trim(), author: author.trim(), description: description.trim() });
+    if (!title.trim() || adding) return;
+    setAdding(true);
+    const book = createBook({ title: title.trim(), author: author.trim(), description: description.trim() });
+
+    // Auto-detect chapters via AI
+    if (hasApiKey() && author.trim()) {
+      try {
+        const chapters = await detectChapters(title.trim(), author.trim());
+        if (Array.isArray(chapters)) {
+          chapters.forEach((ch, i) => {
+            const name = typeof ch === 'string' ? ch : ch.title || ch.name || `Chapter ${i + 1}`;
+            createChapter({ bookId: book.id, title: name, chapterNumber: i + 1 });
+          });
+        }
+      } catch {
+        // Chapter detection is best-effort — book is still added
+      }
+    }
+
     setBooks(getBooks());
     setTitle('');
     setAuthor('');
     setDescription('');
     setShowForm(false);
+    setAdding(false);
   }
 
   const filtered = books
@@ -113,10 +133,11 @@ export default function Library() {
           />
           <button
             type="submit"
-            className="w-full py-[7px] text-[13px] font-medium rounded-md transition-colors"
+            disabled={adding}
+            className="w-full py-[7px] text-[13px] font-medium rounded-md transition-colors disabled:opacity-50"
             style={{ background: '#37352f', color: '#fff' }}
           >
-            Add Book
+            {adding ? 'Adding book & detecting chapters...' : 'Add Book'}
           </button>
         </form>
       )}

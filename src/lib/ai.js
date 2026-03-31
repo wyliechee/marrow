@@ -154,6 +154,17 @@ Evaluate this answer.`;
   return JSON.parse(raw);
 }
 
+export async function detectChapters(bookTitle, author) {
+  const system = `You are a book structure assistant. Given a book title and author, return the list of chapters or major sections. Return valid JSON only — an array of strings, each being a chapter title. If you don't know the book's chapters, return an empty array []. Do not guess or make up chapters.`;
+
+  const user = `Book: "${bookTitle}" by ${author}
+
+List the chapters of this book.`;
+
+  const raw = await callLLM(system, user);
+  return JSON.parse(raw);
+}
+
 export async function generateFlashcards(bookTitle, chapterTitle, notes) {
   const system = `You are a study assistant. Generate 2-3 flashcards for spaced repetition based on the key concepts. Return valid JSON only — an array of objects with "concept" and "explanation" fields.`;
 

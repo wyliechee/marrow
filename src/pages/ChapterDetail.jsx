@@ -9,6 +9,12 @@ import {
 import { getChapterScore } from '../lib/scoring';
 import RecallQuiz from '../components/RecallQuiz';
 
+const statusStyle = {
+  recalled: { background: '#dbeddb', color: '#2d8a56' },
+  logged: { background: '#fdecc8', color: '#9a6700' },
+  unread: { background: '#f1f1ef', color: '#787774' },
+};
+
 export default function ChapterDetail() {
   const { bookId, chapterId } = useParams();
   const navigate = useNavigate();
@@ -41,6 +47,7 @@ export default function ChapterDetail() {
   if (!book || !chapter) return null;
 
   const chScore = getChapterScore(chapterId);
+  const sty = statusStyle[chapter.status] || statusStyle.unread;
 
   function handleLog(e) {
     e.preventDefault();
@@ -59,32 +66,32 @@ export default function ChapterDetail() {
   }
 
   return (
-    <div className="flex-1 px-5 pt-6 pb-6">
+    <div className="flex-1 px-6 pt-6 pb-6 max-w-lg mx-auto w-full">
       {/* Back nav */}
       <Link
         to={`/library/${bookId}`}
-        className="text-sm text-gray-400 no-underline flex items-center gap-1 mb-4"
+        className="text-[13px] no-underline flex items-center gap-1 mb-5"
+        style={{ color: '#9b9a97' }}
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <svg className="w-[14px] h-[14px]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
         </svg>
         {book.title}
       </Link>
 
       {/* Chapter header */}
-      <h1 className="text-xl font-semibold text-gray-900">
+      <h1 className="text-[20px] font-semibold" style={{ color: '#37352f' }}>
         Ch. {chapter.chapterNumber}: {chapter.title}
       </h1>
       <div className="flex items-center gap-3 mt-2">
-        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-          chapter.status === 'recalled' ? 'bg-green-50 text-green-600' :
-          chapter.status === 'logged' ? 'bg-amber-50 text-amber-600' :
-          'bg-gray-100 text-gray-500'
-        }`}>
+        <span
+          className="text-[11px] font-medium px-2 py-0.5 rounded-sm"
+          style={sty}
+        >
           {chapter.status}
         </span>
         {chScore !== null && (
-          <span className="text-sm text-gray-500">Score: {Math.round(chScore * 100)}%</span>
+          <span className="text-[12px]" style={{ color: '#787774' }}>Score: {Math.round(chScore * 100)}%</span>
         )}
       </div>
 
@@ -92,14 +99,16 @@ export default function ChapterDetail() {
       <div className="flex gap-2 mt-5">
         <button
           onClick={() => { setShowLogForm(!showLogForm); setShowQuiz(false); }}
-          className="flex-1 py-2.5 text-sm font-medium rounded-lg bg-accent text-white"
+          className="flex-1 py-[8px] text-[13px] font-medium rounded-md transition-colors"
+          style={{ background: '#37352f', color: '#fff' }}
         >
           Log Reading
         </button>
         {sessions.length > 0 && (
           <button
             onClick={() => { setShowQuiz(!showQuiz); setShowLogForm(false); }}
-            className="flex-1 py-2.5 text-sm font-medium rounded-lg border border-accent text-accent"
+            className="flex-1 py-[8px] text-[13px] font-medium rounded-md transition-colors"
+            style={{ border: '1px solid #e9e9e7', color: '#5160C8', background: '#fff' }}
           >
             Recall Quiz
           </button>
@@ -108,21 +117,23 @@ export default function ChapterDetail() {
 
       {/* Log form */}
       {showLogForm && (
-        <form onSubmit={handleLog} className="mt-4 bg-white rounded-xl border border-gray-100 p-4 space-y-3">
+        <form onSubmit={handleLog} className="mt-4 rounded-lg p-4 space-y-2.5" style={{ background: '#fbfbfa', border: '1px solid #e9e9e7' }}>
           <div className="flex gap-2">
             <input
               type="number"
               placeholder="Start page"
               value={pageStart}
               onChange={(e) => setPageStart(e.target.value)}
-              className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-accent"
+              className="flex-1 px-3 py-[7px] rounded-md text-[13px] focus:outline-none"
+              style={{ border: '1px solid #e9e9e7', color: '#37352f' }}
             />
             <input
               type="number"
               placeholder="End page"
               value={pageEnd}
               onChange={(e) => setPageEnd(e.target.value)}
-              className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-accent"
+              className="flex-1 px-3 py-[7px] rounded-md text-[13px] focus:outline-none"
+              style={{ border: '1px solid #e9e9e7', color: '#37352f' }}
             />
           </div>
           <textarea
@@ -130,11 +141,13 @@ export default function ChapterDetail() {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-accent resize-none"
+            className="w-full px-3 py-[7px] rounded-md text-[13px] focus:outline-none resize-none"
+            style={{ border: '1px solid #e9e9e7', color: '#37352f' }}
           />
           <button
             type="submit"
-            className="w-full py-2 bg-accent text-white text-sm font-medium rounded-lg"
+            className="w-full py-[7px] text-[13px] font-medium rounded-md"
+            style={{ background: '#37352f', color: '#fff' }}
           >
             Save Session
           </button>
@@ -152,28 +165,28 @@ export default function ChapterDetail() {
       )}
 
       {/* Past sessions */}
-      <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mt-8 mb-3">
+      <p className="text-[11px] uppercase tracking-widest font-medium mt-9 mb-3" style={{ color: '#9b9a97' }}>
         Reading Sessions ({sessions.length})
-      </h2>
+      </p>
       {sessions.length === 0 ? (
-        <p className="text-center text-gray-400 text-sm py-6">Log your first reading session above</p>
+        <p className="text-center text-[13px] py-8" style={{ color: '#9b9a97' }}>Log your first reading session above</p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-px">
           {sessions.map((s) => {
             const recalls = getRecallSessionsBySession(s.id);
             return (
-              <div key={s.id} className="bg-white rounded-xl border border-gray-100 p-4">
+              <div key={s.id} className="rounded-md px-3 py-3" style={{ background: '#fbfbfa' }}>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-400">
+                  <span className="text-[12px]" style={{ color: '#9b9a97' }}>
                     {new Date(s.createdAt).toLocaleDateString()}
-                    {s.pageStart && s.pageEnd ? ` · pp. ${s.pageStart}–${s.pageEnd}` : ''}
+                    {s.pageStart && s.pageEnd ? ` \u00b7 pp. ${s.pageStart}\u2013${s.pageEnd}` : ''}
                   </span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-[12px]" style={{ color: '#9b9a97' }}>
                     {recalls.length} recall{recalls.length !== 1 ? 's' : ''}
                   </span>
                 </div>
                 {s.notes && (
-                  <p className="text-sm text-gray-700 mt-2 line-clamp-3">{s.notes}</p>
+                  <p className="text-[13px] mt-1.5 line-clamp-3" style={{ color: '#37352f' }}>{s.notes}</p>
                 )}
               </div>
             );
@@ -184,14 +197,14 @@ export default function ChapterDetail() {
       {/* Cards */}
       {cards.length > 0 && (
         <>
-          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mt-8 mb-3">
+          <p className="text-[11px] uppercase tracking-widest font-medium mt-9 mb-3" style={{ color: '#9b9a97' }}>
             Flashcards ({cards.length})
-          </h2>
-          <div className="space-y-2">
+          </p>
+          <div className="space-y-px">
             {cards.map((card) => (
-              <div key={card.id} className="bg-white rounded-xl border border-gray-100 p-4">
-                <p className="text-sm font-medium text-gray-900">{card.concept}</p>
-                <p className="text-sm text-gray-500 mt-1">{card.explanation}</p>
+              <div key={card.id} className="rounded-md px-3 py-3" style={{ background: '#fbfbfa' }}>
+                <p className="text-[13px] font-medium" style={{ color: '#37352f' }}>{card.concept}</p>
+                <p className="text-[13px] mt-0.5" style={{ color: '#787774' }}>{card.explanation}</p>
               </div>
             ))}
           </div>

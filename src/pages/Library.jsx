@@ -38,12 +38,13 @@ export default function Library() {
     });
 
   return (
-    <div className="flex-1 px-5 pt-8 pb-6">
+    <div className="flex-1 px-6 pt-10 pb-6 max-w-lg mx-auto w-full">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">Library</h1>
+        <h1 className="text-[22px] font-semibold" style={{ color: '#37352f' }}>Library</h1>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-accent text-white text-xl leading-none"
+          className="w-7 h-7 flex items-center justify-center rounded-md text-[18px] leading-none transition-colors"
+          style={{ background: showForm ? '#e9e9e7' : '#37352f', color: showForm ? '#37352f' : '#fff' }}
         >
           {showForm ? '\u00d7' : '+'}
         </button>
@@ -51,7 +52,7 @@ export default function Library() {
 
       {/* Search */}
       <div className="mt-4 relative">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-[14px] h-[14px]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#9b9a97">
           <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
         </svg>
         <input
@@ -59,21 +60,23 @@ export default function Library() {
           placeholder="Search books..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:border-accent"
+          className="w-full pl-8 pr-3 py-[7px] rounded-md text-[13px] focus:outline-none"
+          style={{ background: '#fbfbfa', border: '1px solid #e9e9e7', color: '#37352f' }}
         />
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 mt-3 bg-gray-100 rounded-xl p-1">
+      <div className="flex gap-0.5 mt-3 rounded-md p-0.5" style={{ background: '#f1f1ef' }}>
         {FILTERS.map((f) => (
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
-              filter === f.key
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500'
-            }`}
+            className="flex-1 py-[5px] text-[12px] font-medium rounded-[5px] transition-all"
+            style={{
+              background: filter === f.key ? '#fff' : 'transparent',
+              color: filter === f.key ? '#37352f' : '#9b9a97',
+              boxShadow: filter === f.key ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+            }}
           >
             {f.label}
           </button>
@@ -82,13 +85,14 @@ export default function Library() {
 
       {/* Add book form */}
       {showForm && (
-        <form onSubmit={handleAdd} className="mt-4 bg-white rounded-xl border border-gray-100 p-4 space-y-3">
+        <form onSubmit={handleAdd} className="mt-4 rounded-lg p-4 space-y-2.5" style={{ background: '#fbfbfa', border: '1px solid #e9e9e7' }}>
           <input
             type="text"
             placeholder="Book title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-accent"
+            className="w-full px-3 py-[7px] rounded-md text-[13px] focus:outline-none"
+            style={{ border: '1px solid #e9e9e7', color: '#37352f' }}
             autoFocus
           />
           <input
@@ -96,18 +100,21 @@ export default function Library() {
             placeholder="Author"
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-accent"
+            className="w-full px-3 py-[7px] rounded-md text-[13px] focus:outline-none"
+            style={{ border: '1px solid #e9e9e7', color: '#37352f' }}
           />
           <textarea
-            placeholder="Brief description (optional \u2014 helps AI generate better questions for niche books)"
+            placeholder="Brief description (optional)"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-accent resize-none"
+            className="w-full px-3 py-[7px] rounded-md text-[13px] focus:outline-none resize-none"
+            style={{ border: '1px solid #e9e9e7', color: '#37352f' }}
           />
           <button
             type="submit"
-            className="w-full py-2.5 bg-accent text-white text-sm font-medium rounded-xl"
+            className="w-full py-[7px] text-[13px] font-medium rounded-md transition-colors"
+            style={{ background: '#37352f', color: '#fff' }}
           >
             Add Book
           </button>
@@ -115,38 +122,39 @@ export default function Library() {
       )}
 
       {/* Book list */}
-      <div className="mt-4 space-y-2">
+      <div className="mt-3">
         {filtered.map((book) => {
           const score = getBookScore(book.id);
           const pct = Math.round(score * 100);
-          const color = pct >= 70 ? 'text-green-600' : pct >= 40 ? 'text-amber-600' : 'text-gray-400';
+          const scoreColor = pct >= 70 ? '#2d8a56' : pct >= 40 ? '#c2850a' : '#9b9a97';
           return (
             <Link
               key={book.id}
               to={`/library/${book.id}`}
-              className="flex items-center justify-between bg-white rounded-xl border border-gray-100 p-4 no-underline"
+              className="flex items-center justify-between rounded-md px-3 py-3 no-underline hover:bg-gray-50 transition-colors"
             >
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-gray-900 truncate">
+                <p className="text-[14px] font-medium truncate" style={{ color: '#37352f' }}>
                   {search.trim() ? highlightMatch(book.title, search) : book.title}
                 </p>
-                <p className="text-sm text-gray-500 truncate">{book.author}</p>
+                <p className="text-[12px] truncate" style={{ color: '#9b9a97' }}>{book.author}</p>
               </div>
-              <span className={`text-sm font-semibold ml-3 ${color}`}>{pct}%</span>
+              <span className="text-[13px] font-medium ml-3" style={{ color: scoreColor }}>{pct}%</span>
             </Link>
           );
         })}
       </div>
 
       {filtered.length === 0 && !showForm && (
-        <div className="mt-12 text-center">
-          <p className="text-gray-400 text-sm">
+        <div className="mt-16 text-center">
+          <p className="text-[13px]" style={{ color: '#9b9a97' }}>
             {books.length === 0 ? 'Your library is empty' : 'No books match your search'}
           </p>
           {books.length === 0 && (
             <button
               onClick={() => setShowForm(true)}
-              className="mt-3 text-sm font-medium text-accent"
+              className="mt-3 text-[13px] font-medium"
+              style={{ color: '#5160C8' }}
             >
               Add your first book
             </button>
@@ -164,7 +172,7 @@ function highlightMatch(text, query) {
   return (
     <>
       {text.slice(0, idx)}
-      <span className="text-accent font-semibold">{text.slice(idx, idx + query.length)}</span>
+      <span style={{ color: '#5160C8' }} className="font-medium">{text.slice(idx, idx + query.length)}</span>
       {text.slice(idx + query.length)}
     </>
   );
